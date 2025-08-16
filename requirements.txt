@@ -5,6 +5,11 @@ ultralytics>=8.0.0
 transformers>=4.30.0
 Pillow>=9.0.0
 
+# FastAPI and server
+fastapi>=0.100.0
+uvicorn[standard]>=0.20.0
+python-multipart>=0.0.6
+
 # Computer Vision
 opencv-python>=4.8.0
 
