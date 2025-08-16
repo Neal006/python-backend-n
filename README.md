@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 ### 4. Start the server
 ```bash
-uvicorn inference_server:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 ---
@@ -84,7 +84,7 @@ print(response.json())
 ---
 
 ## 🌐 CORS
-If using a frontend on a different port, make sure to enable CORS in `inference_server.py`:
+If using a frontend on a different port, make sure to enable CORS in `app.py`:
 ```python
 from fastapi.middleware.cors import CORSMiddleware
 app.add_middleware(
@@ -96,12 +96,39 @@ app.add_middleware(
 )
 ```
 
+## 🔧 Environment Variables
+
+### Local Development
+Create a `.env` file in the root directory:
+```bash
+# Copy from env.example
+cp env.example .env
+```
+
+### Render Deployment
+Add these environment variables in your Render dashboard:
+
+| Variable | Value | Description |
+|----------|-------|-------------|
+| `NODE_ENV` | `production` | Environment setting |
+| `PORT` | `8000` | Port number |
+| `DEVICE` | `cpu` | Device for ML models (cpu/gpu) |
+| `MODEL_PATH` | `models/deepfashion2_yolov8s-seg.pt` | Path to YOLO model |
+| `INDEX_PATH` | `index/jersey_index.faiss` | Path to FAISS index |
+| `METADATA_PATH` | `index/jersey_metadata.npy` | Path to metadata |
+| `LOG_LEVEL` | `INFO` | Logging level |
+| `CORS_ORIGINS` | `*` | Allowed CORS origins |
+
+### Environment Variable Reference
+See `env.example` for a complete list of configurable variables.
+
 ---
 
 ## 📂 Project Structure
 ```
-├── inference_server.py      # FastAPI app and endpoints
-├── requirements.txt         # Python dependencies
+├── app.py                  # FastAPI app and endpoints
+├── requirements.txt        # Python dependencies
+├── env.example            # Environment variables template
 ├── models/
 │   └── deepfashion2_yolov8s-seg.pt
 ├── index/

@@ -23,9 +23,10 @@ app = FastAPI(
 )
 
 # Add CORS middleware
+cors_origins = os.getenv('CORS_ORIGINS', '*').split(',')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, restrict this to your frontend domain
+    allow_origins=cors_origins,  # In production, restrict this to your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -35,7 +36,17 @@ app.add_middleware(
 logger.info("Starting model loading process...")
 
 try:
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # Get environment variables with defaults
+    device_name = os.getenv('DEVICE', 'cpu')
+    model_path = os.getenv('MODEL_PATH', 'models/deepfashion2_yolov8s-seg.pt')
+    index_path = os.getenv('INDEX_PATH', 'index/jersey_index.faiss')
+    metadata_path = os.getenv('METADATA_PATH', 'index/jersey_metadata.npy')
+    log_level = os.getenv('LOG_LEVEL', 'INFO')
+    
+    # Set logging level
+    logging.getLogger().setLevel(getattr(logging, log_level))
+    
+    device = torch.device(device_name)
     logger.info(f"Using device: {device}")
     
     logger.info("Loading DINO processor...")
@@ -45,13 +56,13 @@ try:
     dino_model = AutoModel.from_pretrained('facebook/dinov2-base').to(device)
     
     logger.info("Loading YOLO model...")
-    yolo_model = YOLO("models/deepfashion2_yolov8s-seg.pt")
+    yolo_model = YOLO(model_path)
     
     logger.info("Loading FAISS index...")
-    faiss_index = faiss.read_index("index/jersey_index.faiss")
+    faiss_index = faiss.read_index(index_path)
     
     logger.info("Loading metadata...")
-    loaded_data = np.load("index/jersey_metadata.npy", allow_pickle=True)
+    loaded_data = np.load(metadata_path, allow_pickle=True)
     if isinstance(loaded_data, dict):
         index_to_path = {int(k): v for k, v in loaded_data.items()}
     elif isinstance(loaded_data, np.ndarray):
